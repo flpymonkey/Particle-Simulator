@@ -1,8 +1,10 @@
 '''This script is testing mass, particle centered gravity(left click),
-density(darker blue means higher density), and input amount of gravity('f' key')'''
+density(darker blue means higher density), input amount of gravity('f' key'),
+and quadtree collision system'''
 import pygame, random, math
 
 from pygame.locals import *
+from Quadtreetest import *
 
 WHITE = (255, 255, 255)
 GREEN = (0, 128, 0)
@@ -37,11 +39,11 @@ FPSCLOCK = pygame.time.Clock()
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption('Particle Simulator')
 
-number_of_particles = 20 #Number of particles when simulation begins
-particleSize = (5, 13) #Range of particle size
-mass_of_air = 0.001 #Mass of air (higher value means more air resistance)
+number_of_particles = 200 #Number of particles when simulation begins
+particleSize = (5, 10) #Range of particle size
+mass_of_air = 0.02 #Mass of air (higher value means more air resistance)
 elasticity = 0.75 #Percent of speed remaining after a collision
-gravity = [math.pi, 0.8] #gravity angle and magnitude
+gravity = [math.pi, 0.008] #gravity angle and magnitude
 speedNum = False #If True, particle speeds appear near particles (Pixles per frame)
 
 def displaymenu():
@@ -123,6 +125,13 @@ class Particle():
         self.speed = 0
         self.angle = 0
         self.selected = False
+        self.set_rect()
+
+    def get_rect(self):
+        return self.rect
+
+    def set_rect(self):
+        self.rect = pygame.Rect(self.x-self.size, self.y-self.size, self.size*2, self.size*2)
 
     def getselected(self):
         return self.selected
@@ -272,10 +281,15 @@ while running:
         displaymenu()
         pause = False
         menu = False
+        
+    tree = Quadtree(0, pygame.Rect(0,0,width,height), my_particles)#comment out these lines two not use quadtree framework
+    tree.update(screen)#comment out these lines two not use quadtree framework
+    
     for i, particle in enumerate(my_particles):
         if not pause: 
             particle.move()
             particle.bounce()
+            particle.set_rect()
             #particle.adjstcolour(0, random.randint(1,5), 0)
             for particle2 in my_particles[i+1:]:
                 collide(particle, particle2)
