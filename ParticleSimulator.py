@@ -29,7 +29,7 @@ HOTPINK = (255, 105, 180)
 
 pygame.init()
 
-background_colour = (0,0,0)
+background_color = (0,0,0)
 (width, height) = (1400, 800)
 gameFont = pygame.font.Font(None, 20)
 particleFont = pygame.font.Font(None, 20)
@@ -39,19 +39,20 @@ FPSCLOCK = pygame.time.Clock()
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption('Particle Simulator')
 
-number_of_particles = 1000 #Number of particles when simulation begins
-particleSize = (3, 8) #Range of particle size
-mass_of_air = 0.02 #Mass of air (higher value means more air resistance)
-gravity = [math.pi, 0.008] #gravity angle and magnitude
+number_of_particles = 500 #Number of particles when simulation begins (500)
+particleSize = (3, 8) #Range of particle size (3 < particleSize < 16)
+mass_of_air = 0.02 #Mass of air (higher value means more air resistance) (0.02)
+gravity = [math.pi, 0.008] #gravity angle and magnitude (realistic-0.5, space-0.008)
 speedNum = False #If True, particle speeds appear near particles (Pixles per frame)
 
 def displaymenu():
     menu = True
-    menucolour = [0, 0, 0]
+    menucolor = [0, 0, 0]
     while menu:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                print ('add quit stuff')#add quit------------------------------------
+                pygame.quit()
+                sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 (mouseLB,mouseMB,mouseRB) = pygame.mouse.get_pressed()
                 (mouseX, mouseY) = pygame.mouse.get_pos()
@@ -59,8 +60,8 @@ def displaymenu():
                     menu = False
                 else:
                     selected_particle = findParticle(my_particles, mouseX, mouseY)
-        menucolour = adjustcolour(menucolour, 0, 0, random.randint(1,5))
-        pygame.draw.rect(screen, menucolour, menupos)
+        menucolor = adjustcolor(menucolor, 0, 0, random.randint(1,5))
+        pygame.draw.rect(screen, menucolor, menupos)
         FPSCLOCK.tick(FPS)
         pygame.display.update()
 
@@ -70,7 +71,7 @@ def createParticle(x = None, y = None):
     if x == None or y == None:
         x = random.randint(size, width-size)
         y = random.randint(size, height-size)
-    particle = Particle((x, y), size, density)#start color%%%
+    particle = Particle((x, y), size, density)
     particle.speed = random.random()
     particle.angle = random.uniform(0, math.pi*2)
 
@@ -120,7 +121,7 @@ class Particle():
         self.mass = density*size**2
         self.drag = (self.mass/(self.mass + mass_of_air)) ** self.size
         self.elasticity = 0.75 #Percent of speed remaining after a collision
-        self.colour = [200-density*10, 200-density*10, 255]
+        self.color = [200-density*10, 200-density*10, 255]#starting color
         self.thickness = 0
         self.speed = 0
         self.angle = 0
@@ -143,7 +144,7 @@ class Particle():
             self.selected = True
 
     def display(self):
-        pygame.draw.circle(screen, self.colour, (int(self.x), int(self.y)), self.size, self.thickness)
+        pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.size, self.thickness)
         if self.selected:
             pygame.draw.circle(screen, WHITE, (int(self.x), int(self.y)), self.size - 2, self.thickness)
         if speedNum:
@@ -156,19 +157,19 @@ class Particle():
         self.y -= math.cos(self.angle) * self.speed
         self.speed *= self.drag
 
-    def adjstcolour(self, r, g, b):
-        if self.colour[0] + r <= 255:
-            self.colour[0] += r
+    def adjstcolor(self, r, g, b):
+        if self.color[0] + r <= 255:
+            self.color[0] += r
         else:
-            self.colour[0] = self.colour[0]+ r - 255
-        if self.colour[1] + g <= 255:
-            self.colour[1] += g
+            self.color[0] = self.color[0]+ r - 255
+        if self.color[1] + g <= 255:
+            self.color[1] += g
         else:
-            self.colour[1] = self.colour[1]+ g - 255
-        if self.colour[2] + b <= 255:
-            self.colour[2] += b
+            self.color[1] = self.color[1]+ g - 255
+        if self.color[2] + b <= 255:
+            self.color[2] += b
         else:
-            self.colour[2] = self.colour[2]+ b - 255
+            self.color[2] = self.color[2]+ b - 255
 
     def bounce(self):
         if self.x > width - self.size:
@@ -237,8 +238,8 @@ while running:
                 gravity[1] -= 0.001
             if event.key == pygame.K_d:
                 gravity[1] -= 0.01
-            if event.key == pygame.K_f:
-                gravity[1] = input('Enter a magnitude value for gravity: ')
+            #if event.key == pygame.K_f:
+                #gravity[1] = input('Enter a magnitude value for gravity: ')
             if event.key == pygame.K_r:
                 gravity[1] = -gravity[1]
             if event.key == pygame.K_q:
@@ -256,7 +257,7 @@ while running:
                 mousegrav = False
     if not pause:
         if screenfill:
-            screen.fill(background_colour)
+            screen.fill(background_color)
         if mousegrav:
             for i, particle in enumerate(my_particles):
                 (mouseX, mouseY) = pygame.mouse.get_pos()
@@ -287,9 +288,9 @@ while running:
             particle.move()
             particle.bounce()
             particle.set_rect()
-            particle.adjstcolour(0, random.randint(1,5), 0)
-    tree = Quadtree(0, pygame.Rect(0,0,width,height), my_particles)#comment out these lines two not use quadtree framework
-    tree.update(screen)#comment out these lines two not use quadtree framework
+            particle.adjstcolor(random.randint(1,5), 0, 0)
+    tree = Quadtree(0, pygame.Rect(0,0,width,height), my_particles)#comment out these lines for no collisions
+    tree.update(screen)#comment out these lines for no collisions
     for particle in my_particles:
         particle.display()
     gravText = gameFont.render(str(gravity[1]), True, WHITE)
@@ -297,4 +298,7 @@ while running:
     screen.blit(gravText, (5,5))
     screen.blit(numText, (5,20))
     FPSCLOCK.tick(FPS)
-    pygame.display.flip()
+    pygame.display.update()
+
+pygame.quit()
+sys.exit()

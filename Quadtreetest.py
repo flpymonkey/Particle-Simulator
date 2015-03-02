@@ -1,7 +1,7 @@
 import pygame
 import math
 
-displayTree = False
+displayTree = False #Display quadtree in background if True
 
 def rect_quad_split(rect):
     w=rect.width/2.0
@@ -43,9 +43,15 @@ def addVectors((angle1, length1), (angle2, length2)):
 
 class Quadtree(object):
     def __init__(self, level, rect, particles=[], color = (0,0,0)):
-        self.maxlevel = 4
+        '''A quad tree class that recursively subdivides to create subbranches for collision detection
+        level: the level of subdivision that the branch is created on (0 for original branch)
+        rect: a pygame Rect object that represents the portion of the screen the branch covers
+        particles: list of Particle object instances that determine subdivision
+        color: the color of the quadtree (if displayTree == True'''
+        
+        self.maxlevel = 4#max level of subdivision
         self.level = level
-        self.maxparticles = 0
+        self.maxparticles = 3#minimum number of particles without subdivision
         self.rect = rect
         self.particles = particles
         self.color = color
@@ -79,6 +85,8 @@ class Quadtree(object):
         
 
     def update(self, display):
+        '''tests for subdivisions of branches and collision of particles
+        if displayTree == True the quadtree will be displayed behind particle simulation'''
         if len(self.particles) > self.maxparticles and self.level <= self.maxlevel:
             self.subdivide()
             self.subdivide_particles()

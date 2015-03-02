@@ -35,7 +35,7 @@ particleFont = pygame.font.Font(None, 20)
 FPS = 30
 FPSCLOCK = pygame.time.Clock()
 
-number_of_particles = 200 #200
+number_of_particles = 2000 #200
 particleSize = (3, 8)
 particleColour = [0, 255, 0]
 drag = 0.999
