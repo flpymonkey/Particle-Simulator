@@ -39,7 +39,7 @@ FPSCLOCK = pygame.time.Clock()
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption('Particle Simulator')
 
-number_of_particles = 500 #Number of particles when simulation begins (500)
+number_of_particles = 1000 #Number of particles when simulation begins (500)
 particleSize = (3, 8) #Range of particle size (3 < particleSize < 16)
 mass_of_air = 0.02 #Mass of air (higher value means more air resistance) (0.02)
 gravity = [math.pi, 0.008] #gravity angle and magnitude (realistic-0.5, space-0.008)
@@ -47,7 +47,7 @@ speedNum = False #If True, particle speeds appear near particles (Pixles per fra
 
 def displaymenu():
     menu = True
-    menucolor = [0, 0, 0]
+    menucolor = averagecolor(my_particles)
     while menu:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -60,7 +60,6 @@ def displaymenu():
                     menu = False
                 else:
                     selected_particle = findParticle(my_particles, mouseX, mouseY)
-        menucolor = adjustcolor(menucolor, 0, 0, random.randint(1,5))
         pygame.draw.rect(screen, menucolor, menupos)
         FPSCLOCK.tick(FPS)
         pygame.display.update()
@@ -111,6 +110,31 @@ def collide(p1, p2):
         p2.x -= math.sin(angle)*overlap
         p2.y += math.cos(angle)*overlap
 
+def adjustcolor(color, r, g, b):
+        if color[0] + r <= 255:
+            color[0] += r
+        else:
+            color[0] = color[0]+ r - 255
+        if color[1] + g <= 255:
+            color[1] += g
+        else:
+            color[1] = color[1]+ g - 255
+        if color[2] + b <= 255:
+            color[2] += b
+        else:
+            color[2] = color[2]+ b - 255
+        return color
+
+def averagecolor(particlelist):
+    coloravg = [0,0,0]
+    for particle in particlelist:
+        coloravg[0] += particle.color[0]
+        coloravg[1] += particle.color[1]
+        coloravg[2] += particle.color[2]
+    coloravg[0]= coloravg[0]/len(particlelist)
+    coloravg[1]= coloravg[1]/len(particlelist)
+    coloravg[2]= coloravg[2]/len(particlelist)
+    return coloravg
 
 class Particle():
     def __init__(self, (x, y), size, density = 1):
@@ -157,7 +181,7 @@ class Particle():
         self.y -= math.cos(self.angle) * self.speed
         self.speed *= self.drag
 
-    def adjstcolor(self, r, g, b):
+    def adjustcolor(self, r, g, b):
         if self.color[0] + r <= 255:
             self.color[0] += r
         else:
@@ -220,9 +244,9 @@ while running:
                         grav_particles.append(grav_particle)
                     else:
                         grav_particles.remove(grav_particle)
-                #pause = True
-                #menu = True
-                #menupos = Rect((mouseX, mouseY),(200,300))
+                pause = True
+                menu = True
+                menupos = Rect((mouseX, mouseY),(200,300))
             else:
                 selected_particle = findParticle(my_particles, mouseX, mouseY)
         elif event.type == pygame.MOUSEBUTTONUP:
@@ -288,7 +312,7 @@ while running:
             particle.move()
             particle.bounce()
             particle.set_rect()
-            particle.adjstcolor(random.randint(1,5), 0, 0)
+            particle.adjustcolor(random.randint(1,5), 0, 0)
     tree = Quadtree(0, pygame.Rect(0,0,width,height), my_particles)#comment out these lines for no collisions
     tree.update(screen)#comment out these lines for no collisions
     for particle in my_particles:
