@@ -6,7 +6,7 @@ Requires Python 2.7.7 and Pygame 1.9.1
 Run the ParticleSimulator.py script to begin the simulation.
 
 Right click and hold a particle to grab, move, or throw it.
-Left click creates a new particle at the mouse cursor.
+Left click causes particles to gravitate around a particle.
 Hold spacebar to make the mouse cursor the center of gravity.
 'W' 'S' 'E' 'D' keys change the magnitude of gravity.
 'R' inverts the gravity from positive to negative
