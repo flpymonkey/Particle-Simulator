@@ -46,26 +46,39 @@ speedNum = False #If True, particle speeds appear near particles (Pixles per fra
 
 def displaymenu(particle, position):
     menu = True
-    (menux, menuy) = (position.x, position.y)
+    if position[1] >= height/2:
+        menuy = position[1]-position[3]
+    else:
+        menuy = position[1]
+    if position[0] >= width/2:
+        menux = position[0]-position[2]
+    else:
+        menux = position[0]
+    menuRect = Rect(menux, menuy, position[2], position[3])
     menucolor = averagecolor(my_particles)
+    if menucolor[0] > 210 or menucolor[1] > 210 or menucolor[2] > 210:
+        textcolor = BLACK
+    else:
+        textcolor = WHITE
     if particle:
-        speedText = gameFont.render('Speed:'+str(round(particle.speed,2)), True, WHITE)
-        coordText = gameFont.render('(x,y):'+str((particle.get_x(),particle.get_y())), True, WHITE)
-        massText = gameFont.render('Mass:'+str(particle.get_mass()),True,WHITE)
-    breakText = gameFont.render('--------------------------------',True,WHITE)
-    createText= gameFont.render('CREATE PARTICLE', True, WHITE)
-    deleteText = gameFont.render('DELETE PARTICLE',True,WHITE)
-    cloneText= gameFont.render('CLONE PARTICLE', True, WHITE)
-    gravpartText= gameFont.render('GRAVITATE PARTICLE', True, WHITE)
-    stopText= gameFont.render('STOP PARTICLE', True, WHITE)
-    gravallText= gameFont.render('DEGRAVITATE ALL', True, WHITE)
-    gravmultText= gameFont.render('3X GRAVITY', True, WHITE)
-    gravdividText= gameFont.render('GRAVITY /3', True, WHITE)
-    entgravText= gameFont.render('ENTER GRAVITY AMOUNT', True, WHITE)
-    scrambleText= gameFont.render('SCRAMBLE PARTICLES', True, WHITE)
-    airmassText= gameFont.render('MASS OF AIR TO ZERO', True, WHITE)
-    danceText= gameFont.render('DANCE PARTY', True, WHITE)
+        speedText = gameFont.render('Speed:'+str(round(particle.speed,2)), True, textcolor)
+        coordText = gameFont.render('(x,y):'+str((particle.get_x(),particle.get_y())), True, textcolor)
+        massText = gameFont.render('Mass:'+str(particle.get_mass()),True,textcolor)
+    breakText = gameFont.render('--------------------------------',True,textcolor)
+    createText= gameFont.render('CREATE PARTICLE', True, textcolor)
+    deleteText = gameFont.render('DELETE PARTICLE',True,textcolor)
+    cloneText= gameFont.render('CLONE PARTICLE', True, textcolor)
+    gravpartText= gameFont.render('GRAVITATE PARTICLE', True, textcolor)
+    stopText= gameFont.render('STOP PARTICLE', True, textcolor)
+    gravallText= gameFont.render('DEGRAVITATE ALL', True, textcolor)
+    gravmultText= gameFont.render('3X GRAVITY', True, textcolor)
+    gravdividText= gameFont.render('GRAVITY /3', True, textcolor)
+    entgravText= gameFont.render('ENTER GRAVITY AMOUNT', True, textcolor)
+    scrambleText= gameFont.render('SCRAMBLE PARTICLES', True, textcolor)
+    airmassText= gameFont.render('MASS OF AIR TO ZERO', True, textcolor)
+    danceText= gameFont.render('DANCE PARTY', True, textcolor)
     while menu:
+        yblit = menuy + 5
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -76,25 +89,39 @@ def displaymenu(particle, position):
                     menu = False
                 else:
                     selected_particle = findParticle(my_particles, mouseX, mouseY)
-        pygame.draw.rect(screen, menucolor, position)
+        pygame.draw.rect(screen, menucolor, menuRect)
+        pygame.draw.circle(screen, WHITE, (position[0], position[1]), 2, 0)
         if particle:
-            screen.blit(speedText, (menux+5,menuy+5))
-            screen.blit(coordText, (menux+90,menuy+5))
-            screen.blit(massText, (menux+5,menuy+20))
-            screen.blit(breakText, (menux+5,menuy+35))
-            screen.blit(deleteText, (menux+5,menuy+50))
-            screen.blit(cloneText, (menux+5,menuy+65))
-            screen.blit(gravpartText, (menux+5,menuy+80))
-            screen.blit(stopText, (menux+5,menuy+95))
+            screen.blit(speedText, (menux+5,yblit))
+            screen.blit(coordText, (menux+90,yblit))
+            yblit += 15
+            screen.blit(massText, (menux+5,yblit))
+            yblit += 15
+            screen.blit(breakText, (menux+5,yblit))
+            yblit += 15
+            screen.blit(deleteText, (menux+5,yblit))
+            yblit += 15
+            screen.blit(cloneText, (menux+5,yblit))
+            yblit += 15
+            screen.blit(gravpartText, (menux+5,yblit))
+            yblit += 15
+            screen.blit(stopText, (menux+5,yblit))
+            yblit += 15
 
-        screen.blit(breakText, (menux+5,menuy+110))
-        screen.blit(createText, (menux+5,menuy+125))
-        screen.blit(breakText, (menux+5,menuy+140))
-        screen.blit(gravallText, (menux+5,menuy+155))
-        screen.blit(gravmultText, (menux+5,menuy+170))
-        screen.blit(gravdividText, (menux+115,menuy+170))
-        screen.blit(entgravText, (menux+5,menuy+185))
-        screen.blit(breakText, (menux+5,menuy+200))
+        screen.blit(breakText, (menux+5,yblit))
+        yblit += 15
+        screen.blit(createText, (menux+5,yblit))
+        yblit += 15
+        screen.blit(breakText, (menux+5,yblit))
+        yblit += 15
+        screen.blit(gravallText, (menux+5,yblit))
+        yblit += 15
+        screen.blit(gravmultText, (menux+5,yblit))
+        screen.blit(gravdividText, (menux+115,yblit))
+        yblit += 15
+        screen.blit(entgravText, (menux+5,yblit))
+        yblit += 15
+        screen.blit(breakText, (menux+5,yblit))
             
         FPSCLOCK.tick(FPS)
         pygame.display.update()
@@ -285,9 +312,9 @@ while running:
                 pause = True
                 menu = True
                 if mouse_particle:
-                    menupos = Rect((mouse_particle.get_x(), mouse_particle.get_y()),(200,300))
+                    menupos = (mouse_particle.get_x(), mouse_particle.get_y(), 200, 220)#x,y,w,h
                 else:
-                    menupos = Rect((mouseX, mouseY),(200,300))
+                    menupos = (mouseX, mouseY, 200, 120)#x,y,w,h
             else:
                 selected_particle = findParticle(my_particles, mouseX, mouseY)
         elif event.type == pygame.MOUSEBUTTONUP:
