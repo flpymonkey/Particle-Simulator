@@ -32,6 +32,8 @@ pygame.init()
 background_color = (0,0,0)
 (width, height) = (1400, 800)
 gameFont = pygame.font.Font(None, 20)
+selectFont = pygame.font.Font(None, 20)
+selectFont.set_underline(True)
 FPS = 30
 FPSCLOCK = pygame.time.Clock()
 
@@ -65,20 +67,10 @@ def displaymenu(particle, position):
         coordText = gameFont.render('(x,y):'+str((particle.get_x(),particle.get_y())), True, textcolor)
         massText = gameFont.render('Mass:'+str(particle.get_mass()),True,textcolor)
     breakText = gameFont.render('--------------------------------',True,textcolor)
-    createText= gameFont.render('CREATE PARTICLE', True, textcolor)
-    deleteText = gameFont.render('DELETE PARTICLE',True,textcolor)
-    cloneText= gameFont.render('CLONE PARTICLE', True, textcolor)
-    gravpartText= gameFont.render('GRAVITATE PARTICLE', True, textcolor)
-    stopText= gameFont.render('STOP PARTICLE', True, textcolor)
-    gravallText= gameFont.render('DEGRAVITATE ALL', True, textcolor)
-    gravmultText= gameFont.render('3X GRAVITY', True, textcolor)
-    gravdividText= gameFont.render('GRAVITY /3', True, textcolor)
-    entgravText= gameFont.render('ENTER GRAVITY AMOUNT', True, textcolor)
-    scrambleText= gameFont.render('SCRAMBLE PARTICLES', True, textcolor)
-    airmassText= gameFont.render('MASS OF AIR TO ZERO', True, textcolor)
-    danceText= gameFont.render('DANCE PARTY', True, textcolor)
+
     while menu:
         yblit = menuy + 5
+        (mouseX, mouseY) = pygame.mouse.get_pos()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -88,7 +80,7 @@ def displaymenu(particle, position):
                 if mouseRB:
                     menu = False
                 else:
-                    selected_particle = findParticle(my_particles, mouseX, mouseY)
+                    (mouseX, mouseY) = pygame.mouse.get_pos()
         pygame.draw.rect(screen, menucolor, menuRect)
         pygame.draw.circle(screen, WHITE, (position[0], position[1]), 2, 0)
         if particle:
@@ -99,29 +91,83 @@ def displaymenu(particle, position):
             yblit += 15
             screen.blit(breakText, (menux+5,yblit))
             yblit += 15
+            if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux and mouseX <= menux+menuRect.width:
+                deleteText = selectFont.render('DELETE PARTICLE',True,textcolor)
+            else:
+                deleteText = gameFont.render('DELETE PARTICLE',True,textcolor)
             screen.blit(deleteText, (menux+5,yblit))
             yblit += 15
+            if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux and mouseX <= menux+menuRect.width:
+                cloneText= selectFont.render('CLONE PARTICLE', True, textcolor)
+            else:
+                cloneText= gameFont.render('CLONE PARTICLE', True, textcolor)
             screen.blit(cloneText, (menux+5,yblit))
             yblit += 15
+            if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux and mouseX <= menux+menuRect.width:
+                gravpartText= selectFont.render('GRAVITATE PARTICLE', True, textcolor)
+            else:
+                gravpartText= gameFont.render('GRAVITATE PARTICLE', True, textcolor)
             screen.blit(gravpartText, (menux+5,yblit))
             yblit += 15
+            if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux and mouseX <= menux+menuRect.width:
+                stopText= selectFont.render('STOP PARTICLE', True, textcolor)
+            else:
+                stopText= gameFont.render('STOP PARTICLE', True, textcolor)
             screen.blit(stopText, (menux+5,yblit))
             yblit += 15
 
         screen.blit(breakText, (menux+5,yblit))
         yblit += 15
+        if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux and mouseX <= menux+menuRect.width:
+            createText= selectFont.render('CREATE PARTICLE', True, textcolor)
+        else:
+            createText= gameFont.render('CREATE PARTICLE', True, textcolor)
         screen.blit(createText, (menux+5,yblit))
         yblit += 15
         screen.blit(breakText, (menux+5,yblit))
         yblit += 15
+        if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux and mouseX <= menux+menuRect.width:
+            gravallText= selectFont.render('DEGRAVITATE ALL', True, textcolor)
+        else:
+            gravallText= gameFont.render('DEGRAVITATE ALL', True, textcolor)
         screen.blit(gravallText, (menux+5,yblit))
         yblit += 15
+        if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux and mouseX <= menux+(menuRect.width/2):
+            gravmultText= selectFont.render('3X GRAVITY', True, textcolor)
+        else:
+            gravmultText= gameFont.render('3X GRAVITY', True, textcolor)
         screen.blit(gravmultText, (menux+5,yblit))
+        if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux+(menuRect.width/2) and mouseX <= menux+menuRect.width:
+            gravdividText= selectFont.render('GRAVITY /3', True, textcolor)
+        else:
+            gravdividText= gameFont.render('GRAVITY /3', True, textcolor)
         screen.blit(gravdividText, (menux+115,yblit))
         yblit += 15
+        if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux and mouseX <= menux+menuRect.width:
+            entgravText= selectFont.render('ENTER GRAVITY AMOUNT', True, textcolor)
+        else:
+            entgravText= gameFont.render('ENTER GRAVITY AMOUNT', True, textcolor)
         screen.blit(entgravText, (menux+5,yblit))
         yblit += 15
         screen.blit(breakText, (menux+5,yblit))
+        yblit += 15
+        if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux and mouseX <= menux+menuRect.width:
+            scrambleText= selectFont.render('SCRAMBLE PARTICLES', True, textcolor)
+        else:
+            scrambleText= gameFont.render('SCRAMBLE PARTICLES', True, textcolor)
+        screen.blit(scrambleText, (menux+5,yblit))
+        yblit += 15
+        if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux and mouseX <= menux+menuRect.width:
+            airmassText= selectFont.render('MASS OF AIR TO ZERO', True, textcolor)
+        else:
+            airmassText= gameFont.render('MASS OF AIR TO ZERO', True, textcolor)
+        screen.blit(airmassText, (menux+5,yblit))
+        yblit += 15
+        if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux and mouseX <= menux+menuRect.width:
+            danceText= selectFont.render('DANCE PARTY', True, textcolor)
+        else:
+            danceText= gameFont.render('DANCE PARTY', True, textcolor)
+        screen.blit(danceText, (menux+5,yblit))
             
         FPSCLOCK.tick(FPS)
         pygame.display.update()
@@ -312,9 +358,9 @@ while running:
                 pause = True
                 menu = True
                 if mouse_particle:
-                    menupos = (mouse_particle.get_x(), mouse_particle.get_y(), 200, 220)#x,y,w,h
+                    menupos = (mouse_particle.get_x(), mouse_particle.get_y(), 200, 265)#x,y,w,h
                 else:
-                    menupos = (mouseX, mouseY, 200, 120)#x,y,w,h
+                    menupos = (mouseX, mouseY, 200, 160)#x,y,w,h
             else:
                 selected_particle = findParticle(my_particles, mouseX, mouseY)
         elif event.type == pygame.MOUSEBUTTONUP:
