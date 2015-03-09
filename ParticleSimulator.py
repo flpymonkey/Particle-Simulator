@@ -1,7 +1,7 @@
 '''This script is testing mass, particle centered gravity(left click),
 density(darker blue means higher density), input amount of gravity('f' key'),
 and quadtree collision system'''
-import pygame, random, math
+import pygame, random, math, sys
 
 from pygame.locals import *
 from Quadtreetest import *
@@ -40,7 +40,7 @@ FPSCLOCK = pygame.time.Clock()
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption('Particle Simulator')
 
-number_of_particles = 1000 #Number of particles when simulation begins (500)
+number_of_particles = 500 #Number of particles when simulation begins (500)
 particleSize = (3, 8) #Range of particle size (3 < particleSize < 16)
 mass_of_air = 0.02 #Mass of air (higher value means more air resistance) (0.02)
 gravity = [math.pi, 0.008] #gravity angle and magnitude (realistic-0.5, space-0.008)
@@ -48,6 +48,7 @@ speedNum = False #If True, particle speeds appear near particles (Pixles per fra
 
 def displaymenu(particle, position):
     menu = True
+    mouseClicked = False
     if position[1] >= height/2:
         menuy = position[1]-position[3]
     else:
@@ -81,6 +82,7 @@ def displaymenu(particle, position):
                     menu = False
                 else:
                     (mouseX, mouseY) = pygame.mouse.get_pos()
+                    mouseClicked = True
         pygame.draw.rect(screen, menucolor, menuRect)
         pygame.draw.circle(screen, WHITE, (position[0], position[1]), 2, 0)
         if particle:
@@ -93,24 +95,53 @@ def displaymenu(particle, position):
             yblit += 15
             if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux and mouseX <= menux+menuRect.width:
                 deleteText = selectFont.render('DELETE PARTICLE',True,textcolor)
+                if mouseClicked:
+                    my_particles.remove(particle)
+                    if particle in grav_particles:
+                        grav_particles.remove(particle)
+                    return
             else:
                 deleteText = gameFont.render('DELETE PARTICLE',True,textcolor)
             screen.blit(deleteText, (menux+5,yblit))
             yblit += 15
             if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux and mouseX <= menux+menuRect.width:
                 cloneText= selectFont.render('CLONE PARTICLE', True, textcolor)
+                if mouseClicked:
+                    clonex = particle.get_x()+5
+                    cloney = particle.get_y()
+                    clonesize = particle.get_size()
+                    clonedensity = particle.get_density()
+                    createParticle(clonex, cloney, clonesize, clonedensity)
+                    return
             else:
                 cloneText= gameFont.render('CLONE PARTICLE', True, textcolor)
             screen.blit(cloneText, (menux+5,yblit))
             yblit += 15
             if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux and mouseX <= menux+menuRect.width:
-                gravpartText= selectFont.render('GRAVITATE PARTICLE', True, textcolor)
+                if particle.getselected():
+                    gravpartText= selectFont.render('DEGRAVITATE PARTICLE', True, textcolor)
+                    if mouseClicked:
+                        particle.setselected()
+                        grav_particles.remove(particle)
+                        return
+                else:
+                    gravpartText= selectFont.render('GRAVITATE PARTICLE', True, textcolor)
+                    if mouseClicked:
+                        particle.setselected()
+                        grav_particles.append(particle)
+                        return
             else:
-                gravpartText= gameFont.render('GRAVITATE PARTICLE', True, textcolor)
+                if particle.getselected():
+                    gravpartText= gameFont.render('DEGRAVITATE PARTICLE', True, textcolor)
+                else:
+                    gravpartText= gameFont.render('GRAVITATE PARTICLE', True, textcolor)
             screen.blit(gravpartText, (menux+5,yblit))
             yblit += 15
             if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux and mouseX <= menux+menuRect.width:
                 stopText= selectFont.render('STOP PARTICLE', True, textcolor)
+                if mouseClicked:
+                    particle.set_speed(0)
+                    return
             else:
                 stopText= gameFont.render('STOP PARTICLE', True, textcolor)
             screen.blit(stopText, (menux+5,yblit))
@@ -120,6 +151,9 @@ def displaymenu(particle, position):
         yblit += 15
         if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux and mouseX <= menux+menuRect.width:
             createText= selectFont.render('CREATE PARTICLE', True, textcolor)
+            if mouseClicked:
+                createParticle(menux, menuy)
+                return
         else:
             createText= gameFont.render('CREATE PARTICLE', True, textcolor)
         screen.blit(createText, (menux+5,yblit))
@@ -128,23 +162,37 @@ def displaymenu(particle, position):
         yblit += 15
         if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux and mouseX <= menux+menuRect.width:
             gravallText= selectFont.render('DEGRAVITATE ALL', True, textcolor)
+            if mouseClicked:
+                for grav_particle in grav_particles[:]:
+                    grav_particle.setselected()
+                    grav_particles.remove(grav_particle)
+                return
         else:
             gravallText= gameFont.render('DEGRAVITATE ALL', True, textcolor)
         screen.blit(gravallText, (menux+5,yblit))
         yblit += 15
         if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux and mouseX <= menux+(menuRect.width/2):
             gravmultText= selectFont.render('3X GRAVITY', True, textcolor)
+            if mouseClicked:
+                gravity[1] *= 3
+                return
         else:
             gravmultText= gameFont.render('3X GRAVITY', True, textcolor)
         screen.blit(gravmultText, (menux+5,yblit))
         if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux+(menuRect.width/2) and mouseX <= menux+menuRect.width:
             gravdividText= selectFont.render('GRAVITY /3', True, textcolor)
+            if mouseClicked:
+                gravity[1] /= 3
+                return
         else:
             gravdividText= gameFont.render('GRAVITY /3', True, textcolor)
         screen.blit(gravdividText, (menux+115,yblit))
         yblit += 15
         if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux and mouseX <= menux+menuRect.width:
             entgravText= selectFont.render('ENTER GRAVITY AMOUNT', True, textcolor)
+            if mouseClicked:
+                gravity[1] = input('Enter a magnitude value for gravity: ')
+                return
         else:
             entgravText= gameFont.render('ENTER GRAVITY AMOUNT', True, textcolor)
         screen.blit(entgravText, (menux+5,yblit))
@@ -153,18 +201,22 @@ def displaymenu(particle, position):
         yblit += 15
         if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux and mouseX <= menux+menuRect.width:
             scrambleText= selectFont.render('SCRAMBLE PARTICLES', True, textcolor)
+            if mouseClicked:
+                for particle in my_particles:
+                    particle.set_coordinates(random.randint(particle.size, width-particle.size), random.randint(particle.size, height-particle.size))
+                return
         else:
             scrambleText= gameFont.render('SCRAMBLE PARTICLES', True, textcolor)
         screen.blit(scrambleText, (menux+5,yblit))
         yblit += 15
         if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux and mouseX <= menux+menuRect.width:
-            airmassText= selectFont.render('MASS OF AIR TO ZERO', True, textcolor)
-        else:
-            airmassText= gameFont.render('MASS OF AIR TO ZERO', True, textcolor)
-        screen.blit(airmassText, (menux+5,yblit))
-        yblit += 15
-        if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux and mouseX <= menux+menuRect.width:
             danceText= selectFont.render('DANCE PARTY', True, textcolor)
+            if mouseClicked:
+                for particle in my_particles:
+                    particle.set_coordinates(random.randint(particle.size, width-particle.size), random.randint(particle.size, height-particle.size))
+                    particle.set_speed(random.randint(20, 50))
+                    particle.set_color([random.randint(20,230),random.randint(20,230),random.randint(20,230)])
+                return
         else:
             danceText= gameFont.render('DANCE PARTY', True, textcolor)
         screen.blit(danceText, (menux+5,yblit))
@@ -172,9 +224,11 @@ def displaymenu(particle, position):
         FPSCLOCK.tick(FPS)
         pygame.display.update()
 
-def createParticle(x = None, y = None):
-    size = random.randint(particleSize[0], particleSize[1])
-    density = random.randint(1, 20)
+def createParticle(x = None, y = None, size = None, density = None):
+    if size == None:
+        size = random.randint(particleSize[0], particleSize[1])
+    if density == None:
+        density = random.randint(1, 20)
     if x == None or y == None:
         x = random.randint(size, width-size)
         y = random.randint(size, height-size)
@@ -268,6 +322,15 @@ class Particle():
 
     def get_mass(self):
         return self.mass
+
+    def get_density(self):
+        return self.density
+
+    def get_size(self):
+        return self.size
+
+    def get_color(self):
+        return self.color
     
     def get_rect(self):
         return self.rect
@@ -275,9 +338,23 @@ class Particle():
     def set_rect(self):
         self.rect = pygame.Rect(self.x-self.size, self.y-self.size, self.size*2, self.size*2)
 
+    def set_color(self, color):
+        self.color = color
+
+    def set_speed(self, speed):
+        self.speed = speed
+
+    def set_coordinates(self, x, y):
+        self.x = x
+        self.y = y
+        
+        
     def getselected(self):
         return self.selected
 
+    def delete(self, particleList):
+        particleList.remove(self)
+        
     def setselected(self):
         if self.selected:
             self.selected = False
@@ -358,9 +435,9 @@ while running:
                 pause = True
                 menu = True
                 if mouse_particle:
-                    menupos = (mouse_particle.get_x(), mouse_particle.get_y(), 200, 265)#x,y,w,h
+                    menupos = (mouse_particle.get_x(), mouse_particle.get_y(), 200, 250)#x,y,w,h
                 else:
-                    menupos = (mouseX, mouseY, 200, 160)#x,y,w,h
+                    menupos = (mouseX, mouseY, 200, 145)#x,y,w,h
             else:
                 selected_particle = findParticle(my_particles, mouseX, mouseY)
         elif event.type == pygame.MOUSEBUTTONUP:
@@ -376,8 +453,6 @@ while running:
                 gravity[1] -= 0.001
             if event.key == pygame.K_d:
                 gravity[1] -= 0.01
-            #if event.key == pygame.K_f:
-                #gravity[1] = input('Enter a magnitude value for gravity: ')
             if event.key == pygame.K_r:
                 gravity[1] = -gravity[1]
             if event.key == pygame.K_q:
