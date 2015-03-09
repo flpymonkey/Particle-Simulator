@@ -4,7 +4,7 @@ and quadtree collision system'''
 import pygame, random, math, sys
 
 from pygame.locals import *
-from Quadtreetest import *
+from Quadtree import *
 
 WHITE = (255, 255, 255)
 GREEN = (0, 128, 0)
@@ -118,20 +118,20 @@ def displaymenu(particle, position):
             screen.blit(cloneText, (menux+5,yblit))
             yblit += 15
             if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux and mouseX <= menux+menuRect.width:
-                if particle.getselected():
+                if particle.get_selected():
                     gravpartText= selectFont.render('DEGRAVITATE PARTICLE', True, textcolor)
                     if mouseClicked:
-                        particle.setselected()
+                        particle.set_selected()
                         grav_particles.remove(particle)
                         return
                 else:
                     gravpartText= selectFont.render('GRAVITATE PARTICLE', True, textcolor)
                     if mouseClicked:
-                        particle.setselected()
+                        particle.set_selected()
                         grav_particles.append(particle)
                         return
             else:
-                if particle.getselected():
+                if particle.get_selected():
                     gravpartText= gameFont.render('DEGRAVITATE PARTICLE', True, textcolor)
                 else:
                     gravpartText= gameFont.render('GRAVITATE PARTICLE', True, textcolor)
@@ -152,7 +152,7 @@ def displaymenu(particle, position):
         if mouseY >= yblit and mouseY <= yblit+ 15 and mouseX >= menux and mouseX <= menux+menuRect.width:
             createText= selectFont.render('CREATE PARTICLE', True, textcolor)
             if mouseClicked:
-                createParticle(menux, menuy)
+                createParticle(position[0], position[1])
                 return
         else:
             createText= gameFont.render('CREATE PARTICLE', True, textcolor)
@@ -164,7 +164,7 @@ def displaymenu(particle, position):
             gravallText= selectFont.render('DEGRAVITATE ALL', True, textcolor)
             if mouseClicked:
                 for grav_particle in grav_particles[:]:
-                    grav_particle.setselected()
+                    grav_particle.set_selected()
                     grav_particles.remove(grav_particle)
                 return
         else:
@@ -335,6 +335,9 @@ class Particle():
     def get_rect(self):
         return self.rect
 
+    def get_selected(self):
+        return self.selected
+
     def set_rect(self):
         self.rect = pygame.Rect(self.x-self.size, self.y-self.size, self.size*2, self.size*2)
 
@@ -348,18 +351,14 @@ class Particle():
         self.x = x
         self.y = y
         
-        
-    def getselected(self):
-        return self.selected
-
-    def delete(self, particleList):
-        particleList.remove(self)
-        
-    def setselected(self):
+    def set_selected(self):
         if self.selected:
             self.selected = False
         else:
             self.selected = True
+
+    def delete(self, particleList):
+        particleList.remove(self)
 
     def display(self):
         pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.size, self.thickness)
