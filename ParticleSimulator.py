@@ -67,6 +67,8 @@ def displaymenu(particle, position):
         speedText = gameFont.render('Speed:'+str(round(particle.speed,2)), True, textcolor)
         coordText = gameFont.render('(x,y):'+str((particle.get_x(),particle.get_y())), True, textcolor)
         massText = gameFont.render('Mass:'+str(particle.get_mass()),True,textcolor)
+        radiusText = gameFont.render('Radius: ' +str(particle.get_size()),True,textcolor)
+        gravselText = gameFont.render('G',True,textcolor)
     breakText = gameFont.render('--------------------------------',True,textcolor)
 
     while menu:
@@ -90,6 +92,9 @@ def displaymenu(particle, position):
             screen.blit(coordText, (menux+90,yblit))
             yblit += 15
             screen.blit(massText, (menux+5,yblit))
+            screen.blit(radiusText, (menux+90,yblit))
+            if particle.get_selected():
+                screen.blit(gravselText, (menux+180,yblit))
             yblit += 15
             screen.blit(breakText, (menux+5,yblit))
             yblit += 15
