@@ -5,6 +5,7 @@ import pygame, random, math, sys
 
 from pygame.locals import *
 from Quadtree import *
+from ParticleClass import Particle
 
 WHITE = (255, 255, 255)
 GREEN = (0, 128, 0)
@@ -30,7 +31,7 @@ HOTPINK = (255, 105, 180)
 pygame.init()
 
 background_color = (0,0,0)
-(width, height) = (1400, 800)
+(width, height) = (1400, 800)#1400, 800
 gameFont = pygame.font.Font(None, 20)
 selectFont = pygame.font.Font(None, 20)
 selectFont.set_underline(True)
@@ -41,10 +42,9 @@ screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption('Particle Simulator')
 
 number_of_particles = 500 #Number of particles when simulation begins (500)
-particleSize = (3, 9) #Range of particle size (3 < particleSize < 16)
+particleSize = (3, 10) #Range of particle size (3 < particleSize < 16)
 mass_of_air = 0.02 #Mass of air (higher value means more air resistance) (0.02)
-gravity = [math.pi, 0.008] #gravity angle and magnitude (realistic-0.5, space-0.008)
-speedNum = False #If True, particle speeds appear near particles (Pixles per frame)
+gravity = [math.pi, 0.008] #gravity angle and magnitude (realistic=0.5, space=0.008)
 
 def displaymenu(particle, position):
     menu = True
@@ -255,41 +255,17 @@ def createParticle(x = None, y = None, size = None, density = None):
     if x == None or y == None:
         x = random.randint(size, width-size)
         y = random.randint(size, height-size)
-    particle = Particle((x, y), size, density)
+    particle = Particle((x, y), size, density, mass_of_air)
     particle.speed = random.random()
     particle.angle = random.uniform(0, math.pi*2)
 
     my_particles.append(particle)
-
-def addVectors((angle1, length1), (angle2, length2)):
-    x  = math.sin(angle1) * length1 + math.sin(angle2) * length2
-    y  = math.cos(angle1) * length1 + math.cos(angle2) * length2
-    
-    angle = 0.5 * math.pi - math.atan2(y, x)
-    length  = math.hypot(x, y)
-
-    return (angle, length)
 
 def findParticle(particles, x, y):
     for p in particles:
         if math.hypot(p.x-x, p.y-y) <= p.size:
             return p
     return None        
-
-def adjustcolor(color, r, g, b):
-        if color[0] + r <= 255:
-            color[0] += r
-        else:
-            color[0] = color[0]+ r - 255
-        if color[1] + g <= 255:
-            color[1] += g
-        else:
-            color[1] = color[1]+ g - 255
-        if color[2] + b <= 255:
-            color[2] += b
-        else:
-            color[2] = color[2]+ b - 255
-        return color
 
 def averagecolor(particlelist):
     coloravg = [0,0,0]
@@ -301,133 +277,6 @@ def averagecolor(particlelist):
     coloravg[1]= coloravg[1]/len(particlelist)
     coloravg[2]= coloravg[2]/len(particlelist)
     return coloravg
-
-class Particle():
-    def __init__(self, (x, y), size, density = 1):
-        self.x = x
-        self.y = y
-        self.size = size
-        self.density = density
-        self.mass = density*size**2
-        self.drag = (self.mass/(self.mass + mass_of_air)) ** self.size
-        self.elasticity = 0.75 #Percent of speed remaining after a collision
-        self.color = [200-density*10, 0, 200-density*10]#starting color
-        self.thickness = 0
-        self.speed = 0
-        self.angle = 0
-        self.selected = False
-        self.moveable = True
-        self.set_rect()
-
-    def get_x(self):
-        return int(self.x)
-
-    def get_y(self):
-        return int(self.y)
-
-    def get_mass(self):
-        return self.mass
-
-    def get_density(self):
-        return self.density
-
-    def get_size(self):
-        return self.size
-
-    def get_color(self):
-        return self.color
-    
-    def get_rect(self):
-        return self.rect
-
-    def get_selected(self):
-        return self.selected
-
-    def get_moveable(self):
-        return self.moveable
-
-    def set_rect(self):
-        self.rect = pygame.Rect(self.x-self.size, self.y-self.size, self.size*2, self.size*2)
-
-    def set_color(self, color):
-        self.color = color
-
-    def set_speed(self, speed):
-        self.speed = speed
-        
-    def set_moveable(self):
-        if self.moveable:
-            self.moveable = False
-            self.speed = 0
-            self.angle = 0
-        else:
-            self.moveable = True
-    
-    def set_coordinates(self, x, y):
-        self.x = x
-        self.y = y
-        
-    def set_selected(self):
-        if self.selected:
-            self.selected = False
-        else:
-            self.selected = True
-
-    def delete(self, particleList):
-        particleList.remove(self)
-
-    def display(self):
-        pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.size, self.thickness)
-        if self.selected:
-            pygame.draw.circle(screen, WHITE, (int(self.x), int(self.y)), self.size - 2, self.thickness)
-        if speedNum:
-            partText = gameFont.render(str(int(self.speed)), True, WHITE)
-            screen.blit(partText, (self.x,self.y))
-
-    def move(self):
-        if self.moveable:
-            (self.angle, self.speed) = addVectors((self.angle, self.speed), gravity)
-            self.x += math.sin(self.angle) * self.speed
-            self.y -= math.cos(self.angle) * self.speed
-            self.speed *= self.drag
-        else:
-            self.speed = 0
-            self.angle = 0
-
-    def adjustcolor(self, r, g, b):
-        if self.color[0] + r <= 255:
-            self.color[0] += r
-        else:
-            self.color[0] = self.color[0]+ r - 255
-        if self.color[1] + g <= 255:
-            self.color[1] += g
-        else:
-            self.color[1] = self.color[1]+ g - 255
-        if self.color[2] + b <= 255:
-            self.color[2] += b
-        else:
-            self.color[2] = self.color[2]+ b - 255
-
-    def bounce(self):
-        if self.x > width - self.size:
-            self.x = 2*(width - self.size) - self.x
-            self.angle = - self.angle
-            self.speed *= self.elasticity
-
-        elif self.x < self.size:
-            self.x = 2*self.size - self.x
-            self.angle = - self.angle
-            self.speed *= self.elasticity
-
-        if self.y > height - self.size:
-            self.y = 2*(height - self.size) - self.y
-            self.angle = math.pi - self.angle
-            self.speed *= self.elasticity
-
-        elif self.y < self.size:
-            self.y = 2*self.size - self.y
-            self.angle = math.pi - self.angle
-            self.speed *= self.elasticity
 
 my_particles = []
 grav_particles = []
@@ -452,10 +301,6 @@ while running:
             if mouseRB:
                 mouse_particle = findParticle(my_particles, mouseX, mouseY)
                 menu = True
-                if mouse_particle:
-                    menupos = (mouse_particle.get_x(), mouse_particle.get_y(), 200, 265)#x,y,w,h
-                else:
-                    menupos = (mouseX, mouseY, 200, 160)#x,y,w,h
             else:
                 selected_particle = findParticle(my_particles, mouseX, mouseY)
         elif event.type == pygame.MOUSEBUTTONUP:
@@ -463,6 +308,9 @@ while running:
         elif event.type == KEYDOWN:
             if event.key == pygame.K_SPACE:
                 mousegrav = True
+            if event.key == pygame.K_a:
+                (mouseX, mouseY) = pygame.mouse.get_pos()
+                createParticle(mouseX, mouseY)
             if event.key == pygame.K_w:
                 gravity[1] += 0.001
             if event.key == pygame.K_e:
@@ -508,14 +356,15 @@ while running:
                     dy = grav_particle.y - particle.y
                     (particle.angle, particle.speed) = addVectors((particle.angle, particle.speed), (0.5*math.pi + math.atan2(dy, dx), math.hypot(dx, dy) * gravity[1]))
         for particle in my_particles:
-            particle.move()
-            particle.bounce()
+            particle.move(gravity)
+            particle.bounce(width, height)
             particle.set_rect()
-            particle.adjustcolor(random.randint(1,5), 0, random.randint(1,5))
+            particle.adjustcolor(0, random.randint(1,5), random.randint(1,5))
+            #print (particle.get_x(),particle.get_y())
         tree = Quadtree(0, pygame.Rect(0,0,width,height), my_particles)#comment out these lines for no collisions
         tree.update(screen)#comment out these lines for no collisions
     for particle in my_particles:
-        particle.display()
+        particle.display(screen)
     gravText = gameFont.render(str(gravity[1]), True, WHITE)
     numText = gameFont.render(str(len(my_particles)), True, WHITE)
     if pause:
@@ -523,6 +372,10 @@ while running:
     screen.blit(gravText, (5,5))
     screen.blit(numText, (5,20))
     if menu:
+        if mouse_particle:
+            menupos = (mouse_particle.get_x(), mouse_particle.get_y(), 200, 265)#x,y,w,h
+        else:
+            menupos = (mouseX, mouseY, 200, 145)#x,y,w,h
         if not pause:
             screen.blit(pauseText, (5,35))
         displaymenu(mouse_particle, menupos)
