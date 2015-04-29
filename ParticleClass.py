@@ -52,7 +52,11 @@ class Particle():
     def __init__(self, (x, y), size, density = 1, air_mass = 0.0):
         self.x = x
         self.y = y
+        self.origsize = size
         self.size = size
+        self.maxsize = 6
+        self.minsize = 3
+        self.shrink = True
         self.density = density
         self.mass = density*size**2
         self.drag = (self.mass/(self.mass + air_mass)) ** self.size
@@ -154,6 +158,26 @@ class Particle():
         else:
             self.color[2] = self.color[2]+ b - 255
 
+    def adjustsize(self, amount):
+        if self.shrink == True:
+            if self.size - amount > 0 and self.size >= self.minsize:
+                self.reduce_size(amount)
+            else:
+                self.shrink = False
+        else:
+            if self.size <= self.maxsize:
+                self.increase_size(amount)
+            else:
+                self.shrink = True
+        
+
+    def reduce_size(self, amount):
+        if self.size - amount > 0:
+            self.size -= amount
+
+    def increase_size(self, amount):
+        self.size += amount  
+        
     def bounce(self, display_width, display_height):
         if self.x > display_width - self.size:
             self.x = 2*(display_width - self.size) - self.x

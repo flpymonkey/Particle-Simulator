@@ -42,9 +42,10 @@ screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption('Particle Simulator')
 
 number_of_particles = 500 #Number of particles when simulation begins (500)
-particleSize = (3, 10) #Range of particle size (3 < particleSize < 16)
+particleSize = (3, 15) #Range of particle size (3 < particleSize < 16)
 mass_of_air = 0.02 #Mass of air (higher value means more air resistance) (0.02)
 gravity = [math.pi, 0.008] #gravity angle and magnitude (realistic=0.5, space=0.008)
+crazysize = True
 
 def displaymenu(particle, position):
     menu = True
@@ -356,6 +357,8 @@ while running:
                     dy = grav_particle.y - particle.y
                     (particle.angle, particle.speed) = addVectors((particle.angle, particle.speed), (0.5*math.pi + math.atan2(dy, dx), math.hypot(dx, dy) * gravity[1]))
         for particle in my_particles:
+            if crazysize:
+                particle.adjustsize(1)
             particle.move(gravity)
             particle.bounce(width, height)
             particle.set_rect()
