@@ -41,11 +41,11 @@ FPSCLOCK = pygame.time.Clock()
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption('Particle Simulator')
 
-number_of_particles = 500 #Number of particles when simulation begins (500)
-particleSize = (3, 15) #Range of particle size (3 < particleSize < 16)
+number_of_particles = 100 #Number of particles when simulation begins (500)
+particleSize = (3, 8) #Range of particle size (3 < particleSize < 16)
 mass_of_air = 0.02 #Mass of air (higher value means more air resistance) (0.02)
 gravity = [math.pi, 0.008] #gravity angle and magnitude (realistic=0.5, space=0.008)
-crazysize = True
+crazysize = False
 
 def displaymenu(particle, position):
     menu = True
@@ -256,7 +256,7 @@ def createParticle(x = None, y = None, size = None, density = None):
     if x == None or y == None:
         x = random.randint(size, width-size)
         y = random.randint(size, height-size)
-    particle = Particle((x, y), size, density, mass_of_air)
+    particle = Particle(x, y, size, density, mass_of_air)
     particle.speed = random.random()
     particle.angle = random.uniform(0, math.pi*2)
 
@@ -322,7 +322,7 @@ while running:
                 gravity[1] -= 0.01
             if event.key == pygame.K_r:
                 gravity[1] = -gravity[1]
-            if event.key == pygame.K_q:
+            if event.key == pygame.K_p:
                 if pause:
                     pause = False
                 else:
@@ -343,7 +343,7 @@ while running:
                 (mouseX, mouseY) = pygame.mouse.get_pos()
                 dx = mouseX - particle.x
                 dy = mouseY - particle.y
-                (particle.angle, particle.speed) = addVectors((particle.angle, particle.speed), (0.5*math.pi + math.atan2(dy, dx), math.hypot(dx, dy) * gravity[1]))
+                (particle.angle, particle.speed) = addVectors(particle.angle, particle.speed, 0.5*math.pi + math.atan2(dy, dx), math.hypot(dx, dy) * gravity[1])
         if selected_particle:
             (mouseX, mouseY) = pygame.mouse.get_pos()
             dx = mouseX - selected_particle.x
@@ -355,7 +355,7 @@ while running:
                 for i, grav_particle in enumerate(grav_particles):
                     dx = grav_particle.x - particle.x
                     dy = grav_particle.y - particle.y
-                    (particle.angle, particle.speed) = addVectors((particle.angle, particle.speed), (0.5*math.pi + math.atan2(dy, dx), math.hypot(dx, dy) * gravity[1]))
+                    (particle.angle, particle.speed) = addVectors(particle.angle, particle.speed, 0.5*math.pi + math.atan2(dy, dx), math.hypot(dx, dy) * gravity[1])
         for particle in my_particles:
             if crazysize:
                 particle.adjustsize(1)

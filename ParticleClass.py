@@ -24,7 +24,7 @@ HOTPINK = (255, 105, 180)
 
 speedNum = False #If True, particle speeds appear near particles (Pixles per frame)
 
-def addVectors((angle1, length1), (angle2, length2)):
+def addVectors(angle1, length1, angle2, length2):
     x  = math.sin(angle1) * length1 + math.sin(angle2) * length2
     y  = math.cos(angle1) * length1 + math.cos(angle2) * length2
     
@@ -49,7 +49,7 @@ def adjustcolor(color, r, g, b):
         return color
 
 class Particle():
-    def __init__(self, (x, y), size, density = 1, air_mass = 0.0):
+    def __init__(self, x, y, size, density = 1, air_mass = 0.0):
         self.x = x
         self.y = y
         self.origsize = size
@@ -97,6 +97,8 @@ class Particle():
         return self.moveable
 
     def set_rect(self):
+        #print(self.x)
+        #print(self.size)
         self.rect = pygame.Rect(self.x-self.size, self.y-self.size, self.size*2, self.size*2)
 
     def set_color(self, color):
@@ -136,7 +138,7 @@ class Particle():
 
     def move(self, gravity = [math.pi, 0.000]):
         if self.moveable:
-            (self.angle, self.speed) = addVectors((self.angle, self.speed), gravity)
+            (self.angle, self.speed) = addVectors(self.angle, self.speed, gravity[0], gravity[1])
             self.x += math.sin(self.angle) * self.speed
             self.y -= math.cos(self.angle) * self.speed
             self.speed *= self.drag

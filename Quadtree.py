@@ -23,18 +23,18 @@ def collide(p1, p2):
         total_mass = p1.mass + p2.mass
         overlap = 0.5*(p1.size + p2.size - dist+1)
         if p1.get_moveable():
-            (p1.angle, p1.speed) = addVectors((p1.angle, p1.speed*(p1.mass-p2.mass)/total_mass), (angle, 2*p2.speed*p2.mass/total_mass))
+            (p1.angle, p1.speed) = addVectors(p1.angle, p1.speed*(p1.mass-p2.mass)/total_mass, angle, 2*p2.speed*p2.mass/total_mass)
             p1.speed *= p1.elasticity
             p1.x += math.sin(angle)*overlap
             p1.y -= math.cos(angle)*overlap
         
         if p2.get_moveable():
-            (p2.angle, p2.speed) = addVectors((p2.angle, p2.speed*(p2.mass-p1.mass)/total_mass), (angle+math.pi, 2*p1.speed*p1.mass/total_mass))
+            (p2.angle, p2.speed) = addVectors(p2.angle, p2.speed*(p2.mass-p1.mass)/total_mass, angle+math.pi, 2*p1.speed*p1.mass/total_mass)
             p2.speed *= p2.elasticity
             p2.x -= math.sin(angle)*overlap
             p2.y += math.cos(angle)*overlap
 
-def addVectors((angle1, length1), (angle2, length2)):
+def addVectors(angle1, length1, angle2, length2):
     x  = math.sin(angle1) * length1 + math.sin(angle2) * length2
     y  = math.cos(angle1) * length1 + math.cos(angle2) * length2
     
