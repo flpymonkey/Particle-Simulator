@@ -1,6 +1,9 @@
 import pygame
 import math
 
+from OpenGL.GL import *
+from OpenGL.GLU import *
+
 WHITE = (255, 255, 255)
 GREEN = (0, 128, 0)
 BLUE = (0, 0, 255)
@@ -49,25 +52,26 @@ def adjustcolor(color, r, g, b):
         return color
 
 class Particle():
-    def __init__(self, x, y, size, density = 1, air_mass = 0.0):
+    slices = 40
+    stacks = 40
+    def __init__(self, x, y, size, color, density = 1, air_mass = 0.0):
         self.x = x
         self.y = y
-        self.origsize = size
+        self.position = (x, y, 0)
         self.size = size
-        self.maxsize = 6
-        self.minsize = 3
         self.shrink = True
         self.density = density
         self.mass = density*size**2
         self.drag = (self.mass/(self.mass + air_mass)) ** self.size
         self.elasticity = 0.75 #Percent of speed remaining after a collision
-        self.color = [0, 0, 255-density*10]#starting color 200-density*10
+        self.color = color
         self.thickness = 0
         self.speed = 0
         self.angle = 0
         self.selected = False
         self.moveable = True
         self.set_rect()
+        self.quadratic = gluNewQuadric()
 
     def get_x(self):
         return int(self.x)
@@ -129,7 +133,11 @@ class Particle():
         particleList.remove(self)
 
     def display(self, display):
-        pygame.draw.circle(display, self.color, (int(self.x), int(self.y)), self.size, self.thickness)
+        glPushMatrix()
+        glTranslatef(*self.position)
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, self.color)
+        gluSphere(self.quadratic, self.radius, Sphere.slices, Sphere.stacks)
+        glPopMatrix()
         if self.selected:
             pygame.draw.circle(display, WHITE, (int(self.x), int(self.y)), self.size - 2, self.thickness)
         if speedNum:
@@ -145,40 +153,6 @@ class Particle():
         else:
             self.speed = 0
             self.angle = 0
-
-    def adjustcolor(self, r, g, b):
-        if self.color[0] + r <= 255:
-            self.color[0] += r
-        else:
-            self.color[0] = self.color[0]+ r - 255
-        if self.color[1] + g <= 255:
-            self.color[1] += g
-        else:
-            self.color[1] = self.color[1]+ g - 255
-        if self.color[2] + b <= 255:
-            self.color[2] += b
-        else:
-            self.color[2] = self.color[2]+ b - 255
-
-    def adjustsize(self, amount):
-        if self.shrink == True:
-            if self.size - amount > 0 and self.size >= self.minsize:
-                self.reduce_size(amount)
-            else:
-                self.shrink = False
-        else:
-            if self.size <= self.maxsize:
-                self.increase_size(amount)
-            else:
-                self.shrink = True
-        
-
-    def reduce_size(self, amount):
-        if self.size - amount > 0:
-            self.size -= amount
-
-    def increase_size(self, amount):
-        self.size += amount  
         
     def bounce(self, display_width, display_height):
         if self.x > display_width - self.size:

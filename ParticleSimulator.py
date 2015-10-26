@@ -7,6 +7,9 @@ from pygame.locals import *
 from Quadtree import *
 from ParticleClass import Particle
 
+from OpenGL.GL import *
+from OpenGL.GLU import *
+
 WHITE = (255, 255, 255)
 GREEN = (0, 128, 0)
 BLUE = (0, 0, 255)
@@ -28,10 +31,49 @@ ORANGE = (255, 128, 0)
 CYAN = (0, 255, 255) #AQUA
 HOTPINK = (255, 105, 180)
 
-pygame.init()
+class Light(object):
+    enabled = False
+    colors = [(1.,1.,1.,1.), (1.,0.5,0.5,1.),
+              (0.5,1.,0.5,1.), (0.5,0.5,1.,1.)]
+
+    def __init__(self, light_id, position):
+        self.light_id = light_id
+        self.position = position
+        self.current_color = 0
+
+    def render(self):
+        light_id = self.light_id
+        color = Light.colors[self.current_color]
+        glLightfv(light_id, GL_POSITION, self.position)
+        glLightfv(light_id, GL_DIFFUSE, color)
+        glLightfv(light_id, GL_CONSTANT_ATTENUATION, 0.1)
+        glLightfv(light_id, GL_LINEAR_ATTENUATION, 0.05)
+
+    def switch_color(self):
+        self.current_color += 1
+        self.current_color %= len(Light.colors)
+
+    def enable(self):
+        if not Light.enabled:
+            glEnable(GL_LIGHTING)
+            Light.enabled = True
+        glEnable(self.light_id)
 
 background_color = (0,0,0)
 (width, height) = (1400, 800)#1400, 800
+
+pygame.init()
+pygame.display.set_mode((width, height),
+                                OPENGL | DOUBLEBUF)
+light = Light(GL_LIGHT0, (15, 5, 15, 1))
+glEnable(GL_DEPTH_TEST)
+light.enable()
+glClearColor(.1, .1, .1, 1)
+glMatrixMode(GL_PROJECTION)
+aspect = width / height
+gluPerspective(40., aspect, 1., 40.)
+glMatrixMode(GL_MODELVIEW)
+
 gameFont = pygame.font.Font(None, 20)
 selectFont = pygame.font.Font(None, 20)
 selectFont.set_underline(True)
@@ -46,7 +88,7 @@ particleSize = (3, 8) #Range of particle size (3 < particleSize < 16)
 mass_of_air = 0.02 #Mass of air (higher value means more air resistance) (0.02)
 gravity = [math.pi, 0.008] #gravity angle and magnitude (realistic=0.5, space=0.008)
 crazysize = False
-
+        
 def displaymenu(particle, position):
     menu = True
     mouseClicked = False
@@ -362,10 +404,16 @@ while running:
             particle.move(gravity)
             particle.bounce(width, height)
             particle.set_rect()
-            particle.adjustcolor(0, random.randint(1,5), random.randint(1,5))
+            #particle.adjustcolor(0, random.randint(1,5), random.randint(1,5))
             #print (particle.get_x(),particle.get_y())
         tree = Quadtree(0, pygame.Rect(0,0,width,height), my_particles)#comment out these lines for no collisions
         tree.update(screen)#comment out these lines for no collisions
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    glLoadIdentity()
+    gluLookAt(x, 0, z,
+              0, 0, 0,
+              0, 1, 0)
+    light.render()
     for particle in my_particles:
         particle.display(screen)
     gravText = gameFont.render(str(gravity[1]), True, WHITE)
